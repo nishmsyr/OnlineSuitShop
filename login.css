@@ -1,0 +1,104 @@
+/* General reset */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: Arial, sans-serif;
+  background-color: white;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+/* Header */
+.header {
+  background-color: black;
+  color: white;
+  text-align: center;
+  padding: 10px 0;
+}
+
+/* Logo */
+.logo-container {
+  text-align: center;
+  margin: 20px 0;
+}
+
+.logo {
+  width: 50px;
+  height: 50px;
+}
+
+/* Login form */
+.login-container {
+  width: 300px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.login-container h1 {
+  margin-bottom: 20px;
+}
+
+form {
+  display: flex;
+  flex-direction: column;
+}
+
+label {
+  text-align: left;
+  margin: 5px 0;
+  font-size: 14px;
+}
+
+input[type="email"],
+input[type="password"] {
+  padding: 10px;
+  margin-bottom: 15px;
+  border: 1px solid #ccc;
+  font-size: 14px;
+}
+
+/* Buttons */
+.button-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.login-button {
+  background-color: black;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  margin-right: 10px;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+.login-button:hover {
+  background-color: #333;
+}
+
+.register-link {
+  color: black;
+  text-decoration: none;
+  font-size: 16px;
+}
+
+.register-link:hover {
+  text-decoration: underline;
+}
+
+/* Footer */
+.footer {
+  margin-top: auto;
+  background-color: black;
+  color: white;
+  text-align: center;
+  padding: 10px 0;
+  font-size: 14px;
+}
