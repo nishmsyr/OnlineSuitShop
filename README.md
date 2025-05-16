@@ -1,1 +1,1 @@
-This is a Online Suit Shop System.
+This is a Online Suit Shop System. We created our own company for our group project which sell suits and accessories through online website. We use HTML, CSS and JavaScript as foundation of our website.

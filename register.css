@@ -76,6 +76,10 @@ input[type="password"] {
   font-size: 14px;
 }
 
+input[type="textarea"] {
+  text-align: justify;
+}
+
 .button-container {
   display: flex;
   justify-content: center;
