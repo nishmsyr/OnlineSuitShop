@@ -2,29 +2,42 @@
 <html>
   <head>
     <title>Blacktie | Find your ideal suit</title>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="stylesheet" href="shop.css">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="stylesheet" href="shop.css" />
     <link
       rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+    />
   </head>
   <body>
     <header class="nav-bar">
-      <div class="menu-icon">&#9776;</div>
+      <nav id="hamburger-nav">
+        <div class="hamburger-menu">
+          <div class="hamburger-icon" onclick="toggleMenu()">
+            <span></span>
+            <span></span>
+            <span></span>
+          </div>
+        </div>
+      </nav>
       <div class="logo">
-        <img src="Assets/blacktieWhite.png" alt="Blacktie Logo">
+        <img src="./assets/blacktieWhite.png" alt="Blacktie Logo" />
       </div>
 
       <div class="nav-top">
-        <input type="search" placeholder="Search..." class="search-box">
+        <input type="search" placeholder="Search..." class="search-box" />
       </div>
 
       <div class="nav-center">
         <a href="menu.html">Home</a>
 
         <div class="dropdown">
-          <button class="dropbtn" style="text-decoration: underline" onclick="document.location='shop.html'">
+          <button
+            class="dropbtn"
+            style="text-decoration: underline"
+            onclick="document.location='shop.html'"
+          >
             Shop <i class="fa fa-caret-down"></i>
           </button>
           <div class="dropdown-content">
@@ -34,16 +47,20 @@
           </div>
         </div>
 
-        <a href="#promotion.html">Promotion</a>
-        <a href="#store.html">Store</a>
+        <a href="promotion.html">Promotion</a>
+        <a href="store.html">Store</a>
       </div>
       <div class="nav-right">
-        <a href="login.html" class="fas fa-user"></i> Log In
-        <a href="cart.html" class="fas fa-shopping-cart"></i>
+        <i class="fas fa-user"></i>
+        <a href="login.html">Log In</a>
+        <i
+          class="fas fa-shopping-cart"
+          onclick="document.location='cart.html'"
+        ></i>
       </div>
     </header>
     <div class="shop-picture">
-      <img src="Assets/shopPhoto.png" alt="Suit Photo" />
+      <img src="./assets/shopPhoto.png" alt="Suit Photo" />
     </div>
     <footer></footer>
   </body>
