@@ -89,6 +89,42 @@ body {
   transform: none;
 }
 
+.nav {
+  display: flex;
+  justify-content: space-between;
+  flex-direction: column;
+  align-items: center;
+  padding: 10px 30px;
+  background-color: black;
+  margin-bottom: 1rem;
+  margin-top: -2rem;
+}
+
+.nav-top {
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  flex: 1;
+  margin-right: 20%;
+}
+
+.nav-center {
+  display: flex;
+  gap: 2rem;
+  margin-bottom: -5rem;
+  width: 45%;
+  margin-right: 5rem;
+}
+
+.nav-top .search-box {
+  border-radius: 20px;
+  padding: 6px 12px;
+  font-size: 14px;
+  border: none;
+  outline: none;
+  width: 30rem;
+  margin-left: 10.5rem;
+}
 .nav-center a,
 .dropbtn {
   color: white;
@@ -98,6 +134,7 @@ body {
   background: none;
   border: none;
   cursor: pointer;
+  margin-top: 1rem;
 }
 .nav-center a:hover,
 .dropbtn:hover {
@@ -106,9 +143,20 @@ body {
   color: #ccc;
 }
 
-.dropdown {
-  position: relative;
+.dropbtn .arrow {
+  position: absolute;
   display: inline-block;
+  width: 0.7rem;
+  height: auto;
+  margin-left: 5px;
+  margin-top: 0.25rem;
+  transform: rotate(180deg);
+  transition: all 0.4 ease;
+}
+
+.dropbtn:hover .arrow {
+  transform: rotate(0deg);
+  transition: all 0.3 ease-in-out;
 }
 
 .dropdown-content {
@@ -149,7 +197,7 @@ body {
 .nav-right a {
   color: white;
   text-decoration: none;
-  margin-right: 1rem;
+  margin-right: 2rem;
 }
 
 .nav-right a:hover {

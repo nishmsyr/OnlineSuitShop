@@ -24,30 +24,31 @@
       <div class="logo">
         <img src="./assets/blacktieWhite.png" alt="Blacktie Logo" />
       </div>
-      <div class="nav-top">
-        <input type="search" placeholder="Search..." class="search-box" />
-      </div>
-
-      <div class="nav-center">
-        <a href="menu.html">Home</a>
-
-        <div class="dropdown">
-          <button class="dropbtn" onclick="document.location='shop.html'">
-            Shop <i class="fa fa-caret-down"></i>
-          </button>
-          <div class="dropdown-content">
-            <a href="shop.html">Suit</a>
-            <a href="#">Tie</a>
-            <a href="#">Accessories</a>
-          </div>
+      <div class="nav">
+        <div class="nav-top">
+          <input type="search" placeholder="Search..." class="search-box" />
         </div>
+        <div class="nav-center">
+          <a href="menu.html">Home</a>
 
-        <a href="promotion.html">Promotion</a>
-        <a href="store.html">Store</a>
+          <div class="dropdown">
+            <button class="dropbtn" onclick="document.location='shop.html'">
+              Shop <img src="./assets/arrow.png" alt="Arrow" class="arrow" />
+            </button>
+            <div class="dropdown-content">
+              <a href="shop.html">Suit</a>
+              <a href="#">Tie</a>
+              <a href="#">Accessories</a>
+            </div>
+          </div>
+
+          <a href="promotion.html">Promotion</a>
+          <a href="store.html">Store</a>
+        </div>
       </div>
       <div class="nav-right">
-        <i class="fas fa-user"></i>
-        <a href="login.html">Log In</a>
+        <i class="fas fa-user" onclick="document.location='login.html'"></i>
+        <a href="login.html"><b>Log In</b></a>
         <i
           class="fas fa-shopping-cart"
           onclick="document.location='cart.html'"
@@ -78,8 +79,9 @@
       </div>
     </section>
     <footer class="footer">
-      <p>Blacktie Suit Shop.</p>
+      <p>Copyright &#169; | Blacktie Suit Shop.</p>
     </footer>
+
     <script src="script.js"></script>
   </body>
 </html>

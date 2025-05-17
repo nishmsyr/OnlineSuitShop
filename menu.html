@@ -24,32 +24,35 @@
       <div class="logo">
         <img src="./assets/blacktieWhite.png" alt="Blacktie Logo" />
       </div>
-
-      <div class="nav-top">
-        <input type="search" placeholder="Search..." class="search-box" />
-      </div>
-
-      <div class="nav-center">
-        <a href="#menu.html" style="text-decoration: underline">Home</a>
-
-        <div class="dropdown">
-          <button class="dropbtn" onclick="document.location='shop.html'">
-            Shop <i class="fa fa-caret-down"></i>
-          </button>
-          <div class="dropdown-content">
-            <a href="#shop.html">Suit</a>
-            <a href="#">Tie</a>
-            <a href="#">Accessories</a>
-          </div>
+      <div class="nav">
+        <div class="nav-top">
+          <input type="search" placeholder="Search..." class="search-box" />
         </div>
+        <div class="nav-center">
+          <a href="menu.html" style="text-decoration: underline">Home</a>
 
-        <a href="promotion.html">Promotion</a>
-        <a href="store.html">Store</a>
+          <div class="dropdown">
+            <button class="dropbtn" onclick="document.location='shop.html'">
+              Shop <img src="./assets/arrow.png" alt="Arrow" class="arrow" />
+            </button>
+            <div class="dropdown-content">
+              <a href="shop.html">Suit</a>
+              <a href="#">Tie</a>
+              <a href="#">Accessories</a>
+            </div>
+          </div>
+
+          <a href="promotion.html">Promotion</a>
+          <a href="store.html">Store</a>
+        </div>
       </div>
       <div class="nav-right">
-        <i class="fas fa-user"></i>
-        <a href="login.html">Log In</a>
-        <i class="fas fa-shopping-cart"></i>
+        <i class="fas fa-user" onclick="document.location='login.html'"></i>
+        <a href="login.html"><b>Log In</b></a>
+        <i
+          class="fas fa-shopping-cart"
+          onclick="document.location='cart.html'"
+        ></i>
       </div>
     </header>
 
@@ -64,14 +67,20 @@
       </div>
 
       <div class="social-icons">
-        <a href="#"><i class="fab fa-whatsapp"></i></a>
-        <a href="#"><i class="fab fa-facebook"></i></a>
-        <a href="#"><i class="fab fa-instagram"></i></a>
-        <a href="#"><i class="fab fa-tiktok"></i></a>
+        <a href="https://www.instagram.com/" target="_blank"
+          ><img src="./assets/instagram.png" alt="Instagram icon" class="icon"
+        /></a>
+        <a href="https://www.facebook.com/" target="_blank"
+          ><img src="./assets/facebook.png" alt="Facebook icon" class="icon"
+        /></a>
+        <a href="https://www.tiktok.com/en/" target="_blank"
+          ><img src="./assets/tiktok.png" alt="Tiktok icon" class="icon"
+        /></a>
       </div>
     </section>
     <footer class="footer">
-      <p>Blacktie Suit Shop.</p>
+      <p>Copyright &#169; | Blacktie Suit Shop.</p>
     </footer>
+    <script src="script.js"></script>
   </body>
 </html>
