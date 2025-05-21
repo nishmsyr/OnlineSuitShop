@@ -112,6 +112,7 @@ body {
   gap: 3rem;
   width: 100%;
   position: static;
+  margin-top: 1rem;
 }
 
 .nav-top .search-box {
