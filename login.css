@@ -94,6 +94,7 @@ input[type="password"] {
 
 .login-button:hover {
   background-color: #333;
+  transition: all 0.3 ease;
 }
 
 .register-link {
@@ -106,9 +107,10 @@ input[type="password"] {
 .register-link:hover {
   padding: 10px 10px;
   border-radius: 10px;
-  background-color: #bfbbbb;
+  background-color: #c4c2c2;
   text-decoration: underline;
-  color: white;
+  color: #333;
+  transition: all 0.3s ease;
 }
 
 /* Footer */
