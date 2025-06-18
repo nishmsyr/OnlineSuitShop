@@ -11,62 +11,8 @@
     />
   </head>
   <body>
-    <header class="navbar">
-      <nav id="hamburger-nav">
-        <div class="hamburger-menu">
-          <div class="hamburger-icon" onclick="toggleMenu()">
-            <span></span>
-            <span></span>
-            <span></span>
-          </div>
-          <div class="menu-links">
-            <li><a href="home.html" onclick="toggleMenu()">Home</a></li>
-            <li><a href="shop.html" onclick="toggleMenu()">Shop</a></li>
-            <li>
-              <a href="promotion.html" onclick="toggleMenu()">Promotion</a>
-            </li>
-            <li><a href="store.html" onclick="toggleMenu()">Store</a></li>
-          </div>
-        </div>
-      </nav>
-      <div class="logo">
-        <img src="./assets/blacktieWhite.png" alt="Blacktie Logo" />
-      </div>
-      <div class="nav">
-        <div class="nav-top">
-          <input type="search" placeholder="Search..." class="search-box" />
-        </div>
-        <div class="nav-center">
-          <a href="menu.html">Home</a>
+        <?php include 'component/navbar.php'; ?>
 
-          <div class="dropdown">
-            <button
-              class="dropbtn"
-              onclick="document.location='shop.html'"
-              style="text-decoration: underline"
-            >
-              Shop <img src="./assets/arrow.png" alt="Arrow" class="arrow" />
-            </button>
-            <div class="dropdown-content">
-              <a href="shop.html">Suit</a>
-              <a href="#">Tie</a>
-              <a href="#">Accessories</a>
-            </div>
-          </div>
-
-          <a href="promotion.html">Promotion</a>
-          <a href="store.html">Store</a>
-        </div>
-      </div>
-      <div class="nav-right">
-        <i class="fas fa-user" onclick="document.location='login.html'"></i>
-        <a href="login.html"><b>Log In</b></a>
-        <i
-          class="fas fa-shopping-cart"
-          onclick="document.location='cart.html'"
-        ></i>
-      </div>
-    </header>
     <section class="shop-interface">
       <div class="shop-img">
         <img src="" alt="Shop photo" class="shop-main-img" />
@@ -92,7 +38,7 @@
         </figure>
         <figure class="item-container">
           <div class="item-img">
-            <img src="./assets/Blue Suit.avif" alt="Blue Suit" />
+            <img href="login.html" src="./assets/Blue Suit.avif"  alt="Blue Suit" />
           </div>
           <figcaption class="item-caption">
             Blue Two Buttons Slim Fit Suit
@@ -146,9 +92,8 @@
         </figure>
       </div>
     </section>
-    <footer class="footer">
-      <p>Copyright &#169; | Blacktie Suit Shop.</p>
-    </footer>
+           <?php include 'component/footer.php'; ?>
+
     <script src="script.js"></script>
   </body>
 </html>
