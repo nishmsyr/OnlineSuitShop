@@ -18,16 +18,13 @@
 
     <h1 align="center" style="margin-bottom: 20px">Log In</h1>
     <div class="user-type">
-      <label>
-        <input type="radio" id="customer" name="user" required />
-        Customer
-      </label>
+  <input type="radio" id="customer" name="user" required />
+  <label for="customer">Customer</label>
 
-      <label>
-        <input type="radio" id="staff" name="user" required />
-        Staff
-      </label>
-    </div>
+  <input type="radio" id="staff" name="user" required />
+  <label for="staff">Staff</label>
+</div>
+
     <div class="login-container">
       <form>
         <label for="email">Email</label>
@@ -40,11 +37,11 @@
           <button
             type="submit"
             class="login-button"
-            onclick="document.location='index.html'"
+            onclick="document.location='index.php'"
           >
             Login
           </button>
-          <a href="register.html" class="register-link">Register</a>
+          <a href="register.php" class="register-link">Register</a>
         </div>
       </form>
     </div>
