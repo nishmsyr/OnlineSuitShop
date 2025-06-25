@@ -1,53 +1,85 @@
+<?php
+include 'connect.php';
+session_start();
+
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+  $role = $_POST["role"];
+  $email = $_POST["email"];
+  $password = $_POST["password"];
+
+  $stmt = $conn->prepare("SELECT * FROM users WHERE email = ? AND role = ?");
+  $stmt->bind_param("ss", $email, $role);
+  $stmt->execute();
+
+  $result = $stmt->get_result();
+  if ($result->num_rows === 1) {
+    $user = $result->fetch_assoc();
+
+
+    if ($password === $user["password"]) {
+
+      $_SESSION["user_id"] = $user["id"];
+      $_SESSION["user_name"] = $user["name"];
+      $_SESSION["user_role"] = $user["role"];
+
+      if ($user["role"] === "customer") {
+        header("Location: index.php");
+      } elseif ($user["role"] === "admin") {
+        header("Location: adminhome.php");
+      }
+      exit();
+    } else {
+      echo "<script>alert('Incorrect password.'); window.location.href='login.php';</script>";
+    }
+  } else {
+    echo "<script>alert('No such user found.'); window.location.href='login.php';</script>";
+  }
+
+  $stmt->close();
+}
+$conn->close();
+?>
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>BlackTie | Login Page</title>
-    <link rel="stylesheet" href="login.css" />
-  </head>
-  <body>
-    <header class="header">
-      <h2>Log Into Your Account</h2>
-    </header>
 
-    <div class="logo-container">
-      <img src="./assets/blacktie.png" alt="Blacktie Logo" class="logo" />
-      <hr />
-    </div>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Login - Blacktie Suit Shop</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
 
-    <h1 align="center" style="margin-bottom: 20px">Log In</h1>
-    <div class="user-type">
-  <input type="radio" id="customer" name="user" required />
-  <label for="customer">Customer</label>
+<body>
 
-  <input type="radio" id="staff" name="user" required />
-  <label for="staff">Staff</label>
-</div>
+  <div class="auth-background">
+    <div class="container">
+      <h2>Login</h2>
 
-    <div class="login-container">
-      <form>
-        <label for="email">Email</label>
-        <input type="email" id="email" name="email" required />
-
-        <label for="password">Password</label>
-        <input type="password" id="password" name="password" required />
-
-        <div class="button-container">
-          <button
-            type="submit"
-            class="login-button"
-            onclick="document.location='index.php'"
-          >
-            Login
-          </button>
-          <a href="register.php" class="register-link">Register</a>
+      <form action="login.php" method="POST">
+        <!-- Role selection -->
+        <div class="radio-group">
+          <label><input type="radio" name="role" value="customer" required /> Customer</label>
+          <label><input type="radio" name="role" value="admin" required /> Admin</label>
         </div>
-      </form>
-    </div>
 
-    <footer class="footer">
-      <p>Copyright &#169; | Blacktie Suit Shop.</p>
-    </footer>
-  </body>
+        <!-- Email -->
+        <label for="email">Email</label>
+        <input type="email" name="email" required />
+
+        <!-- Password -->
+        <label for="password">Password</label>
+        <input type="password" name="password" required />
+
+        <!-- Login Button -->
+        <button type="submit">Log In</button>
+      </form>
+
+
+      <!-- Register Redirect -->
+      <p align="center"><br>Don't have an account? <a href="register.php">Create Account</a>.</p>
+    </div>
+  </div>
+
+</body>
+
 </html>
