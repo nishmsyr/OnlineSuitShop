@@ -1,12 +1,9 @@
 <?php
-// Include database connection
+
 include_once 'connect.php';
 
 // ==================== PRODUCT FUNCTIONS ====================
 
-/**
- * Get all products from database
- */
 function getAllProducts($conn) {
     $query = "SELECT product_id, product_name, product_category, product_size, product_colour, product_price, product_quantity FROM product ORDER BY product_name";
     $result = mysqli_query($conn, $query);
@@ -23,9 +20,6 @@ function getAllProducts($conn) {
     return $products;
 }
 
-/**
- * Get single product by ID
- */
 function getProductById($conn, $product_id) {
     $query = "SELECT product_id, product_name, product_category, product_size, product_colour, product_price, product_quantity FROM product WHERE product_id = ? LIMIT 1";
     $stmt = mysqli_prepare($conn, $query);
@@ -44,9 +38,6 @@ function getProductById($conn, $product_id) {
     return $product ? $product : false;
 }
 
-/**
- * Get products by category
- */
 function getProductsByCategory($conn, $category) {
     $query = "SELECT product_id, product_name, product_category, product_size, product_colour, product_price, product_quantity FROM product WHERE product_category = ? ORDER BY product_name";
     $stmt = mysqli_prepare($conn, $query);
@@ -69,9 +60,6 @@ function getProductsByCategory($conn, $category) {
     return $products;
 }
 
-/**
- * Search products by name, category, or color
- */
 function searchProducts($conn, $search_term) {
     $search_term = "%{$search_term}%";
     $query = "SELECT product_id, product_name, product_category, product_size, product_colour, product_price, product_quantity FROM product WHERE product_name LIKE ? OR product_category LIKE ? OR product_colour LIKE ? ORDER BY product_name";
@@ -95,9 +83,6 @@ function searchProducts($conn, $search_term) {
     return $products;
 }
 
-/**
- * Update product quantity (for inventory management)
- */
 function updateProductQuantity($conn, $product_id, $new_quantity) {
     $query = "UPDATE product SET product_quantity = ? WHERE product_id = ?";
     $stmt = mysqli_prepare($conn, $query);
@@ -116,9 +101,6 @@ function updateProductQuantity($conn, $product_id, $new_quantity) {
 
 // ==================== SESSION-BASED CART FUNCTIONS ====================
 
-/**
- * Add item to session cart
- */
 function addToCart($session_id, $product_id, $quantity = 1) {
     if (!isset($_SESSION['cart'])) {
         $_SESSION['cart'] = [];
@@ -134,9 +116,6 @@ function addToCart($session_id, $product_id, $quantity = 1) {
     return true;
 }
 
-/**
- * Get all cart items for current session
- */
 function getCartItems($conn, $session_id) {
     if (!isset($_SESSION['cart']) || empty($_SESSION['cart'])) {
         return [];
@@ -156,7 +135,6 @@ function getCartItems($conn, $session_id) {
         return [];
     }
     
-    // Create types string for bind_param
     $types = str_repeat('i', count($product_ids));
     mysqli_stmt_bind_param($stmt, $types, ...$product_ids);
     mysqli_stmt_execute($stmt);
@@ -172,9 +150,6 @@ function getCartItems($conn, $session_id) {
     return $items;
 }
 
-/**
- * Update cart item quantity
- */
 function updateCartQuantity($session_id, $product_id, $quantity) {
     if (!isset($_SESSION['cart'])) {
         $_SESSION['cart'] = [];
@@ -189,9 +164,6 @@ function updateCartQuantity($session_id, $product_id, $quantity) {
     return true;
 }
 
-/**
- * Remove item from cart
- */
 function removeFromCart($session_id, $product_id) {
     if (isset($_SESSION['cart'][$product_id])) {
         unset($_SESSION['cart'][$product_id]);
@@ -201,9 +173,6 @@ function removeFromCart($session_id, $product_id) {
     return false;
 }
 
-/**
- * Get cart item count
- */
 function getCartCount($conn, $session_id) {
     if (!isset($_SESSION['cart']) || empty($_SESSION['cart'])) {
         return 0;
@@ -212,9 +181,6 @@ function getCartCount($conn, $session_id) {
     return array_sum($_SESSION['cart']);
 }
 
-/**
- * Get cart total amount
- */
 function getCartTotal($conn, $session_id) {
     $cart_items = getCartItems($conn, $session_id);
     $total = 0;
@@ -226,34 +192,22 @@ function getCartTotal($conn, $session_id) {
     return $total;
 }
 
-/**
- * Clear entire cart
- */
 function clearCart($session_id) {
     $_SESSION['cart'] = [];
     logActivity("Cart cleared for session $session_id");
     return true;
 }
 
-/**
- * Check if product is in cart
- */
 function isInCart($product_id) {
     return isset($_SESSION['cart'][$product_id]);
 }
 
-/**
- * Get quantity of specific product in cart
- */
 function getCartProductQuantity($product_id) {
     return isset($_SESSION['cart'][$product_id]) ? $_SESSION['cart'][$product_id] : 0;
 }
 
 // ==================== CUSTOMER FUNCTIONS ====================
 
-/**
- * Get customer by ID
- */
 function getCustomerById($conn, $customer_id) {
     $query = "SELECT customer_id, customer_name, customer_phone_num, customer_email, customer_address FROM customer WHERE customer_id = ? LIMIT 1";
     $stmt = mysqli_prepare($conn, $query);
@@ -272,9 +226,6 @@ function getCustomerById($conn, $customer_id) {
     return $customer ? $customer : false;
 }
 
-/**
- * Get customer by email
- */
 function getCustomerByEmail($conn, $email) {
     $query = "SELECT customer_id, customer_name, customer_phone_num, customer_email, customer_address, PASSWORD FROM customer WHERE customer_email = ? LIMIT 1";
     $stmt = mysqli_prepare($conn, $query);
@@ -293,9 +244,6 @@ function getCustomerByEmail($conn, $email) {
     return $customer ? $customer : false;
 }
 
-/**
- * Create new customer
- */
 function createCustomer($conn, $name, $phone, $email, $address, $password) {
     $query = "INSERT INTO customer (customer_name, customer_phone_num, customer_email, customer_address, PASSWORD) VALUES (?, ?, ?, ?, ?)";
     $stmt = mysqli_prepare($conn, $query);
@@ -313,9 +261,6 @@ function createCustomer($conn, $name, $phone, $email, $address, $password) {
     return $result;
 }
 
-/**
- * Update customer information
- */
 function updateCustomer($conn, $customer_id, $name, $phone, $email, $address) {
     $query = "UPDATE customer SET customer_name = ?, customer_phone_num = ?, customer_email = ?, customer_address = ? WHERE customer_id = ?";
     $stmt = mysqli_prepare($conn, $query);
@@ -332,9 +277,6 @@ function updateCustomer($conn, $customer_id, $name, $phone, $email, $address) {
     return $result;
 }
 
-/**
- * Verify customer login
- */
 function verifyCustomerLogin($conn, $email, $password) {
     $customer = getCustomerByEmail($conn, $email);
     if ($customer && password_verify($password, $customer['PASSWORD'])) {
@@ -345,9 +287,6 @@ function verifyCustomerLogin($conn, $email, $password) {
 
 // ==================== ORDER FUNCTIONS ====================
 
-/**
- * Create new order from cart
- */
 function createOrderFromCart($conn, $customer_id) {
     $cart_items = getCartItems($conn, $_SESSION['session_id']);
     $total_price = getCartTotal($conn, $_SESSION['session_id']);
@@ -403,9 +342,6 @@ function createOrderFromCart($conn, $customer_id) {
     }
 }
 
-/**
- * Get orders by customer ID
- */
 function getOrdersByCustomer($conn, $customer_id) {
     $query = "SELECT o.order_id, o.product_id, o.order_date, o.total_price, p.product_name, p.product_colour, p.product_size 
               FROM orders o 
@@ -432,9 +368,6 @@ function getOrdersByCustomer($conn, $customer_id) {
     return $orders;
 }
 
-/**
- * Get order by ID
- */
 function getOrderById($conn, $order_id) {
     $query = "SELECT o.order_id, o.customer_id, o.product_id, o.order_date, o.total_price, 
                      c.customer_name, c.customer_email, c.customer_address,
@@ -459,9 +392,6 @@ function getOrderById($conn, $order_id) {
     return $order ? $order : false;
 }
 
-/**
- * Get all orders (for admin)
- */
 function getAllOrders($conn) {
     $query = "SELECT o.order_id, o.customer_id, o.product_id, o.order_date, o.total_price, 
                      c.customer_name, c.customer_email,
@@ -487,9 +417,6 @@ function getAllOrders($conn) {
 
 // ==================== PAYMENT FUNCTIONS ====================
 
-/**
- * Create payment record
- */
 function createPayment($conn, $customer_id, $payment_method, $payment_amount) {
     $query = "INSERT INTO payment (customer_id, payment_date, payment_method, payment_amount) VALUES (?, CURDATE(), ?, ?)";
     $stmt = mysqli_prepare($conn, $query);
@@ -506,9 +433,6 @@ function createPayment($conn, $customer_id, $payment_method, $payment_amount) {
     return $result;
 }
 
-/**
- * Get payments by customer ID
- */
 function getPaymentsByCustomer($conn, $customer_id) {
     $query = "SELECT payment_id, payment_date, payment_method, payment_amount FROM payment WHERE customer_id = ? ORDER BY payment_date DESC";
     $stmt = mysqli_prepare($conn, $query);
@@ -533,9 +457,6 @@ function getPaymentsByCustomer($conn, $customer_id) {
 
 // ==================== ADMIN FUNCTIONS ====================
 
-/**
- * Get admin by ID
- */
 function getAdminById($conn, $admin_id) {
     $query = "SELECT admin_id, admin_name, admin_phone, admin_email FROM admin WHERE admin_id = ? LIMIT 1";
     $stmt = mysqli_prepare($conn, $query);

@@ -39,34 +39,27 @@ $conn->close();
       <h2>Account Registration</h2>
 
       <form action="register.php" method="POST">
-        <!-- Name -->
+
         <label for="name">Name</label>
         <input type="text" name="name" required />
 
-        <!-- Phone -->
         <label for="phone">Phone Number</label>
         <input type="text" name="phone" required />
 
-        <!-- Email -->
         <label for="email">Email</label>
         <input type="email" name="email" required />
 
-        <!-- Password -->
         <label for="password">Password</label>
         <input type="password" name="password" required />
 
-        <!-- Address -->
         <label for="address">Address</label>
         <textarea name="address" required></textarea>
 
-        <!-- Role (default to customer) -->
         <input type="hidden" name="role" value="customer" />
 
         <button type="submit">Submit</button>
       </form>
 
-
-      <!-- Login Redirect -->
       <p align="center"><br>Already have an account? <a href="login.php">Log In</a>.</p>
 
     </div>

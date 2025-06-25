@@ -56,26 +56,20 @@ $conn->close();
       <h2>Login</h2>
 
       <form action="login.php" method="POST">
-        <!-- Role selection -->
         <div class="radio-group">
           <label><input type="radio" name="role" value="customer" required /> Customer</label>
           <label><input type="radio" name="role" value="admin" required /> Admin</label>
         </div>
 
-        <!-- Email -->
         <label for="email">Email</label>
         <input type="email" name="email" required />
 
-        <!-- Password -->
         <label for="password">Password</label>
         <input type="password" name="password" required />
 
-        <!-- Login Button -->
         <button type="submit">Log In</button>
       </form>
 
-
-      <!-- Register Redirect -->
       <p align="center"><br>Don't have an account? <a href="register.php">Create Account</a>.</p>
     </div>
   </div>
