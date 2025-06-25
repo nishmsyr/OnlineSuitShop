@@ -18,7 +18,7 @@
         <!-- Left: Logo and Nav Links -->
         <div class="left">
             <h1 class="logo">BLACKTIE</h1>
-            <a href="adminhome.html" class="nav-link">Home</a>
+            <a href="adminhome.php" class="nav-link">Home</a>
         </div>
 
         <!-- Right: Profile, Cart, and Logout -->
@@ -29,7 +29,7 @@
             </button>
 
             <!-- Logout Button -->
-            <button class="logout-btn" onclick="window.location.href='login.html'">
+            <button class="logout-btn" onclick="window.location.href='login.php'">
                 Logout
             </button>
         </div>
@@ -44,21 +44,21 @@
         <div class="shop-now-wrapper">
             <button
                 class="shop-now-button"
-                onclick="window.location.href='order.html'">
+                onclick="window.location.href='order.php'">
                 View Order
             </button>
         </div>
         <div class="shop-now-wrapper">
             <button
                 class="shop-now-button"
-                onclick="window.location.href='product.html'">
+                onclick="window.location.href='product.php'">
                 View Product
             </button>
         </div>
         <div class="shop-now-wrapper">
             <button
                 class="shop-now-button"
-                onclick="window.location.href='customer.html'">
+                onclick="window.location.href='customer.php'">
                 View Customer
             </button>
         </div>

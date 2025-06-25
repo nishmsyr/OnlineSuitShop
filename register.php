@@ -13,7 +13,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
   $stmt->bind_param("ssssss", $name, $phone, $email, $password, $address, $role);
 
   if ($stmt->execute()) {
-    echo "<script>alert('Registration successful! Please login.'); window.location.href='login.html';</script>";
+    echo "<script>alert('Registration successful! Please login.'); window.location.href='login.php';</script>";
   } else {
     echo "Error: " . $stmt->error;
   }

@@ -18,8 +18,8 @@
     <!-- Left: Logo and Nav Links -->
     <div class="left">
       <h1 class="logo">BLACKTIE</h1>
-      <a href="home.html" class="nav-link">Home</a>
-      <a href="shop.html" class="nav-link">Shop</a>
+      <a href="home.php" class="nav-link">Home</a>
+      <a href="shop.php" class="nav-link">Shop</a>
     </div>
 
     <!-- Right: Profile, Cart, and Logout -->
@@ -31,12 +31,12 @@
 
       <!-- Cart Icon -->
       <button class="icon-btn" title="Cart">
-        <i class="fas fa-shopping-cart"></i>
+        <i class="fas fa-shopping-cart" onclick="window.location.href='cart.php'"></i>
       </button>
 
       <!-- Logout Button -->
       <button class="logout-btn" onclick="window.location.href='login.php'">
-        Logout
+        Log Out
       </button>
     </div>
   </div>
