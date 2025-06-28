@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Jun 25, 2025 at 09:15 AM
+-- Generation Time: Jun 27, 2025 at 11:12 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -18,134 +18,87 @@ SET time_zone = "+00:00";
 /*!40101 SET NAMES utf8mb4 */;
 
 --
--- Database: `online_suit_shop`
+-- Database: online_suit_shop
 --
 
 -- --------------------------------------------------------
 
 --
--- Table structure for table `admin`
+-- Table structure for table admins
 --
 
-CREATE TABLE `admin` (
-  `admin_id` int(10) NOT NULL,
-  `admin_name` varchar(100) DEFAULT NULL,
-  `admin_phone` int(12) DEFAULT NULL,
-  `admin_email` varchar(100) DEFAULT NULL
+CREATE TABLE admins (
+  id int(11) NOT NULL,
+  name varchar(100) NOT NULL,
+  phone varchar(15) NOT NULL,
+  email varchar(100) NOT NULL,
+  password varchar(100) NOT NULL,
+  address text DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table admins
+--
+
+INSERT INTO admins (id, name, phone, email, password, address) VALUES
+(1, 'Admin', '999', 'admin@gmail.com', '321', 'admin');
 
 -- --------------------------------------------------------
 
 --
--- Table structure for table `customer`
+-- Table structure for table customers
 --
 
-CREATE TABLE `customer` (
-  `customer_id` int(12) NOT NULL,
-  `customer_name` varchar(100) DEFAULT NULL,
-  `customer_phone_num` int(12) DEFAULT NULL,
-  `customer_email` varchar(100) DEFAULT NULL,
-  `customer_address` varchar(100) DEFAULT NULL,
-  `PASSWORD` varchar(100) DEFAULT NULL
+CREATE TABLE customers (
+  id int(11) NOT NULL,
+  name varchar(100) NOT NULL,
+  phone varchar(15) NOT NULL,
+  email varchar(100) NOT NULL,
+  password varchar(100) NOT NULL,
+  address text DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
--- --------------------------------------------------------
-
 --
--- Table structure for table `orders`
+-- Dumping data for table customers
 --
 
-CREATE TABLE `orders` (
-  `order_id` int(11) NOT NULL,
-  `customer_id` int(12) NOT NULL,
-  `product_id` int(1) NOT NULL,
-  `order_date` date DEFAULT NULL,
-  `total_price` decimal(10,2) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `payment`
---
-
-CREATE TABLE `payment` (
-  `payment_id` int(12) NOT NULL,
-  `customer_id` int(12) DEFAULT NULL,
-  `payment_date` date DEFAULT NULL,
-  `payment_method` varchar(20) DEFAULT NULL,
-  `payment_amount` decimal(10,2) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `product`
---
-
-CREATE TABLE `product` (
-  `product_id` int(10) NOT NULL,
-  `product_name` varchar(100) DEFAULT NULL,
-  `product_category` varchar(100) DEFAULT NULL,
-  `product_size` varchar(10) DEFAULT NULL,
-  `product_colour` varchar(50) DEFAULT NULL,
-  `product_price` decimal(10,2) DEFAULT NULL,
-  `product_quantity` int(100) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+INSERT INTO customers (id, name, phone, email, password, address) VALUES
+(1, 'zakwan', '016', 'zakwan@gmail.com', '123', 'a'),
+(2, 'nadzmi', '014', 'nadzmi2324@gmail.com', '1234', 'lanang');
 
 --
 -- Indexes for dumped tables
 --
 
 --
--- Indexes for table `admin`
+-- Indexes for table admins
 --
-ALTER TABLE `admin`
-  ADD PRIMARY KEY (`admin_id`);
+ALTER TABLE admins
+  ADD PRIMARY KEY (id),
+  ADD UNIQUE KEY email (email);
 
 --
--- Indexes for table `customer`
+-- Indexes for table customers
 --
-ALTER TABLE `customer`
-  ADD PRIMARY KEY (`customer_id`);
+ALTER TABLE customers
+  ADD PRIMARY KEY (id),
+  ADD UNIQUE KEY email (email);
 
 --
--- Indexes for table `orders`
---
-ALTER TABLE `orders`
-  ADD PRIMARY KEY (`order_id`),
-  ADD KEY `customer_id` (`customer_id`),
-  ADD KEY `product_id` (`product_id`);
-
---
--- Indexes for table `payment`
---
-ALTER TABLE `payment`
-  ADD PRIMARY KEY (`payment_id`),
-  ADD KEY `customer_id` (`customer_id`);
-
---
--- Indexes for table `product`
---
-ALTER TABLE `product`
-  ADD PRIMARY KEY (`product_id`);
-
---
--- Constraints for dumped tables
+-- AUTO_INCREMENT for dumped tables
 --
 
 --
--- Constraints for table `orders`
+-- AUTO_INCREMENT for table admins
 --
-ALTER TABLE `orders`
-  ADD CONSTRAINT `orders_ibfk_1` FOREIGN KEY (`customer_id`) REFERENCES `customer` (`customer_id`),
-  ADD CONSTRAINT `orders_ibfk_2` FOREIGN KEY (`product_id`) REFERENCES `product` (`product_id`);
+ALTER TABLE admins
+  MODIFY id int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
--- Constraints for table `payment`
+-- AUTO_INCREMENT for table customers
 --
-ALTER TABLE `payment`
-  ADD CONSTRAINT `payment_ibfk_1` FOREIGN KEY (`customer_id`) REFERENCES `customer` (`customer_id`);
+ALTER TABLE customers
+  MODIFY id int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
