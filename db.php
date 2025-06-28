@@ -3,7 +3,7 @@
 $servername = "localhost";
 $username = "root";
 $password = "";
-$dbname = "online_suit_shop";
+$dbname = "blacktie";
 
 // Create MySQLi connection
 $conn = new mysqli($servername, $username, $password, $dbname);

@@ -1,6 +1,6 @@
 <?php
 // Include database connection
-include_once 'connect.php';
+include_once 'db.php';
 
 // ==================== PRODUCT FUNCTIONS ====================
 

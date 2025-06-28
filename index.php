@@ -2,7 +2,6 @@
 include_once 'functions.php';
 
 $session_id = initializeSession();
-$cart_count = getCartCount($conn, $session_id);
 ?>
 
 <!DOCTYPE html>
@@ -11,7 +10,7 @@ $cart_count = getCartCount($conn, $session_id);
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>BLACKTIE - Where Confidence Wears a Suit</title>
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
     <!-- Header -->
