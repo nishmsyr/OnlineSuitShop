@@ -1,10 +1,53 @@
 <?php
-include_once 'functions.php';
+session_start();
+include 'db.php';
 
-$session_id = initializeSession();
-$products = getAllProducts($conn);
-$cart_count = getCartCount($conn, $session_id);
-$categories = getProductCategories($conn);
+// Check if user is logged in as customer
+if (!isset($_SESSION["user_id"]) || $_SESSION["user_role"] !== "customer") {
+    header("Location: login.php");
+    exit();
+}
+
+// Handle search and category filter
+$search = isset($_GET['search']) ? $_GET['search'] : '';
+$category = isset($_GET['category']) ? $_GET['category'] : '';
+
+// Build query - get products with total stock from all sizes
+$query = "SELECT p.*, SUM(ps.stock) as total_stock 
+          FROM products p 
+          LEFT JOIN product_sizes ps ON p.id = ps.product_id 
+          WHERE 1=1";
+$params = [];
+$types = "";
+
+if (!empty($search)) {
+    $query .= " AND p.name LIKE ?";
+    $params[] = "%$search%";
+    $types .= "s";
+}
+
+if (!empty($category)) {
+    $query .= " AND p.category = ?";
+    $params[] = $category;
+    $types .= "s";
+}
+
+$query .= " GROUP BY p.id HAVING total_stock > 0 ORDER BY p.name ASC";
+
+$stmt = $conn->prepare($query);
+if (!empty($params)) {
+    $stmt->bind_param($types, ...$params);
+}
+$stmt->execute();
+$products = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+$stmt->close();
+
+// Get categories for dropdown
+$categories = [];
+$result = $conn->query("SELECT DISTINCT category FROM products ORDER BY category");
+if ($result->num_rows > 0) {
+    $categories = $result->fetch_all(MYSQLI_ASSOC);
+}
 ?>
 
 <!DOCTYPE html>
@@ -12,458 +55,397 @@ $categories = getProductCategories($conn);
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Shop - BLACKTIE</title>
-    <link rel="stylesheet" href="style.css">
+    <title>Shop - Blacktie Suit Shop</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+        }
+        .modal-content {
+            background-color: white;
+            margin: 5% auto;
+            padding: 30px;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 600px;
+            position: relative;
+        }
+        .close {
+            position: absolute;
+            right: 15px;
+            top: 15px;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            color: #333;
+        }
+        .product-details {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        .product-image {
+            flex: 1;
+        }
+        .product-image img {
+            width: 100%;
+            height: 300px;
+            object-fit: cover;
+            border-radius: 8px;
+        }
+        .product-info {
+            flex: 1;
+        }
+        .product-info h2 {
+            margin-bottom: 10px;
+            color: #333;
+        }
+        .product-price {
+            font-size: 24px;
+            font-weight: bold;
+            color: #000;
+            margin-bottom: 15px;
+        }
+        .size-selector {
+            margin-bottom: 20px;
+        }
+        .size-selector label {
+            color: #333;
+            font-weight: bold;
+        }
+        .size-options {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        .size-btn {
+            padding: 8px 16px;
+            border: 2px solid #ddd;
+            background: white;
+            cursor: pointer;
+            border-radius: 5px;
+            color: #333;
+            position: relative;
+        }
+        .size-btn.selected {
+            border-color: #000;
+            background: #000;
+            color: white;
+        }
+        .size-btn:disabled {
+            background: #f5f5f5;
+            color: #999;
+            cursor: not-allowed;
+            border-color: #ddd;
+        }
+        .size-stock {
+            font-size: 10px;
+            position: absolute;
+            bottom: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: #666;
+        }
+        .quantity-selector {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        .quantity-selector label {
+            color: #333;
+            font-weight: bold;
+        }
+        .qty-btn {
+            width: 30px;
+            height: 30px;
+            border: 1px solid #ddd;
+            background: white;
+            cursor: pointer;
+            border-radius: 3px;
+            color: #333;
+        }
+        .qty-input {
+            width: 60px;
+            text-align: center;
+            border: 1px solid #ddd;
+            padding: 5px;
+            border-radius: 3px;
+            color: #333;
+        }
+        .add-to-cart-btn {
+            width: 100%;
+            padding: 15px;
+            background: #000;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        .add-to-cart-btn:hover {
+            background: #333;
+        }
+        .add-to-cart-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        .stock-info {
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
+        .product-description {
+            color: #666;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+        @media (max-width: 768px) {
+            .product-details {
+                flex-direction: column;
+            }
+        }
+    </style>
 </head>
 <body>
-    <!-- Header -->
-    <header class="header">
-        <div class="container">
-            <div class="nav-brand">
-                <h1>BLACKTIE</h1>
-            </div>
-            <nav class="nav-menu">
-                <a href="index.php" class="nav-link">Home</a>
-                <a href="shop.php" class="nav-link active">Shop</a>
-            </nav>
-            <div class="nav-actions">
-                <!-- Search Box -->
-                <div class="search-box" style="margin-right: 1rem;">
-                    <input type="text" id="searchInput" placeholder="Search products..." 
-                           style="padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px; width: 200px;">
-                </div>
-                
-                <button class="icon-btn">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-                        <circle cx="12" cy="7" r="4"></circle>
-                    </svg>
-                </button>
-                <button class="icon-btn cart-btn" onclick="window.location.href='cart.php'">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <circle cx="9" cy="21" r="1"></circle>
-                        <circle cx="20" cy="21" r="1"></circle>
-                        <path d="m1 1 4 4 2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
-                    </svg>
-                    <?php if($cart_count > 0): ?>
-                        <span class="cart-count" id="cartCount"><?php echo $cart_count; ?></span>
-                    <?php endif; ?>
-                </button>
-                <button class="logout-btn" onclick="window.location.href='login.php'">Log Out</button>
-            </div>
+    <!-- Navigation Bar -->
+    <div class="navbar">
+        <div class="left">
+            <h1 class="logo">BLACKTIE</h1>
+            <a href="home.html" class="nav-link">Home</a>
+            <a href="shop.php" class="nav-link">Shop</a>
         </div>
-    </header>
+        <div class="right">
+            <button class="icon-btn" title="Profile" onclick="window.location.href='profile.php'">
+                <i class="fas fa-user"></i>
+            </button>
+            <button class="icon-btn" title="Cart" onclick="window.location.href='cart.php'">
+                <i class="fas fa-shopping-cart"></i>
+            </button>
+            <button class="logout-btn" onclick="window.location.href='login.php'">Logout</button>
+        </div>
+    </div>
 
-    <!-- Shop Section -->
-    <section class="shop">
-        <div class="container">
-            <h2 class="section-title">Our Collection</h2>
-            
-            <!-- Filter and Sort Section -->
-            <div class="filter-section">
-                <div class="filter-buttons">
-                    <button class="filter-btn active" onclick="filterProducts('all')">All</button>
-                    <?php foreach($categories as $category): ?>
-                        <button class="filter-btn" onclick="filterProducts('<?php echo htmlspecialchars($category); ?>')">
-                            <?php echo htmlspecialchars($category); ?>
-                        </button>
-                    <?php endforeach; ?>
-                </div>
-                
-                <!-- Sort Options -->
-                <div class="sort-section" style="margin-top: 1rem; text-align: center;">
-                    <label for="sortSelect" style="margin-right: 0.5rem;">Sort by:</label>
-                    <select id="sortSelect" onchange="sortProducts(this.value)" 
-                            style="padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px;">
-                        <option value="">Default</option>
-                        <option value="name">Name A-Z</option>
-                        <option value="price-low">Price: Low to High</option>
-                        <option value="price-high">Price: High to Low</option>
-                        <option value="category">Category</option>
+    <!-- Shop Content -->
+    <div class="shop-hero">
+        <div class="shop-content">
+            <!-- Search Area -->
+            <div class="search-area">
+                <form method="GET" style="display: flex; gap: 10px; flex-wrap: wrap;">
+                    <input type="text" id="searchInput" name="search" placeholder="Search products..." 
+                           value="<?= htmlspecialchars($search) ?>">
+                    <select id="categorySelect" name="category">
+                        <option value="">All Categories</option>
+                        <?php foreach ($categories as $cat): ?>
+                            <option value="<?= htmlspecialchars($cat['category']) ?>" 
+                                    <?= $category === $cat['category'] ? 'selected' : '' ?>>
+                                <?= htmlspecialchars($cat['category']) ?>
+                            </option>
+                        <?php endforeach; ?>
                     </select>
-                </div>
+                    <button type="submit" class="view-btn" style="width: auto; margin: 0;">Search</button>
+                </form>
             </div>
 
-            <div class="products-grid">
-                <?php foreach($products as $product): ?>
-                <div class="product-card" data-category="<?php echo htmlspecialchars($product['product_category']); ?>">
-                    <img src="<?php echo htmlspecialchars($product['product_image']); ?>" 
-                         alt="<?php echo htmlspecialchars($product['product_name']); ?>" 
-                         class="product-image"
-                         onclick="quickViewProduct(<?php echo $product['product_id']; ?>)"
-                         style="cursor: pointer;">
-                    <div class="product-info">
-                        <h3 class="product-name"><?php echo htmlspecialchars($product['product_name']); ?></h3>
-                        <p class="product-details">
-                            <span class="product-colour"><?php echo htmlspecialchars($product['product_colour']); ?></span> • 
-                            <span class="product-size">Size <?php echo htmlspecialchars($product['product_size']); ?></span>
-                        </p>
-                        <p class="product-category"><?php echo htmlspecialchars($product['product_category']); ?></p>
-                        <p class="product-price"><?php echo formatPrice($product['product_price']); ?></p>
-                        <p class="product-stock">
-                            <?php if($product['product_quantity'] > 0): ?>
-                                <span class="in-stock">✅ In Stock (<?php echo $product['product_quantity']; ?>)</span>
-                            <?php else: ?>
-                                <span class="out-of-stock">❌ Out of Stock</span>
-                            <?php endif; ?>
-                        </p>
-                        <div class="product-actions" style="display: flex; gap: 0.5rem;">
-                            <button class="add-to-cart-btn" 
-                                    onclick="addToCart(<?php echo $product['product_id']; ?>, '<?php echo htmlspecialchars($product['product_name']); ?>')"
-                                    <?php echo $product['product_quantity'] <= 0 ? 'disabled' : ''; ?>
-                                    style="flex: 1;">
-                                <?php echo $product['product_quantity'] > 0 ? 'Add to Cart' : 'Out of Stock'; ?>
-                            </button>
-                            <button class="quick-view-btn" 
-                                    onclick="quickViewProduct(<?php echo $product['product_id']; ?>)"
-                                    style="padding: 0.75rem; background: #f8f9fa; border: 1px solid #ddd; border-radius: 4px; cursor: pointer;">
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
-                                    <circle cx="12" cy="12" r="3"></circle>
-                                </svg>
+<!-- Products Grid -->
+            <div class="product-grid">
+                <?php if (count($products) > 0): ?>
+                    <?php foreach ($products as $product): ?>
+                        <div class="product-card">
+                            <img src="<?= !empty($product['image']) ? htmlspecialchars($product['image']) : '/placeholder.svg?height=250&width=240' ?>" 
+                                 alt="<?= htmlspecialchars($product['name']) ?>">
+                            <h3><?= htmlspecialchars($product['name']) ?></h3>
+                            <p class="price">RM <?= number_format($product['price'], 2) ?></p>
+                            <p style="margin: 0 15px; color: #666; font-size: 14px;">
+                                Total Stock: <?= $product['total_stock'] ?>
+                                <?php if ($product['total_stock'] <= 10): ?>
+                                    <span style="color: #dc3545;"><i class="fas fa-exclamation-triangle"></i> Low Stock</span>
+                                <?php endif; ?>
+                            </p>
+                            <button class="view-btn" onclick="showProductDetails(<?= $product['id'] ?>)">
+                                View Details
                             </button>
                         </div>
-                    </div>
-                </div>
-                <?php endforeach; ?>
+                    <?php endforeach; ?>
+                <?php else: ?>
+                    <p style="text-align: center; color: white; font-size: 18px; grid-column: 1/-1;">
+                        No products found. Try adjusting your search criteria.
+                    </p>
+                <?php endif; ?>
             </div>
         </div>
-    </section>
+    </div>
+
+    <!-- Product Details Modal -->
+    <div id="productModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal()">&times;</span>
+            <div id="modalContent">
+                <!-- Product details will be loaded here -->
+            </div>
+        </div>
+    </div>
 
     <script>
-        // Shop-specific JavaScript functions
-        
-        // Add item to cart
-        function addToCart(productId, productName) {
-            const btn = event.target
-            const originalText = btn.textContent
-            btn.disabled = true
-            btn.textContent = "Adding..."
+        let selectedSize = null;
+        let selectedSizeStock = 0;
 
-            fetch("api/cart_operations.php", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/x-www-form-urlencoded",
-                },
-                body: `action=add&product_id=${productId}&quantity=1`,
-            })
-            .then((response) => response.json())
-            .then((data) => {
-                if (data.success) {
-                    updateCartCount(data.cart_count)
-                    showNotification(data.message)
-                } else {
-                    showNotification(data.message, "error")
-                }
-            })
-            .catch((error) => {
-                console.error("Error:", error)
-                showNotification("An error occurred", "error")
-            })
-            .finally(() => {
-                btn.disabled = false
-                btn.textContent = originalText
-            })
-        }
-
-        // Filter products by category
-        function filterProducts(category) {
-            const products = document.querySelectorAll(".product-card")
-            const filterBtns = document.querySelectorAll(".filter-btn")
-
-            // Update active button
-            filterBtns.forEach((btn) => btn.classList.remove("active"))
-            event.target.classList.add("active")
-
-            // Filter products with animation
-            products.forEach((product, index) => {
-                setTimeout(() => {
-                    if (category === "all" || product.dataset.category === category) {
-                        product.style.display = "block"
-                        product.style.opacity = "0"
-                        product.style.transform = "translateY(20px)"
-                        
-                        setTimeout(() => {
-                            product.style.transition = "all 0.3s ease"
-                            product.style.opacity = "1"
-                            product.style.transform = "translateY(0)"
-                        }, 50)
-                    } else {
-                        product.style.transition = "all 0.3s ease"
-                        product.style.opacity = "0"
-                        product.style.transform = "translateY(-20px)"
-                        
-                        setTimeout(() => {
-                            product.style.display = "none"
-                        }, 300)
+function showProductDetails(productId) {
+            fetch(`get_product_with_sizes.php?id=${productId}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.error) {
+                        alert('Error: ' + data.error);
+                        return;
                     }
-                }, index * 50) // Stagger animation
-            })
-        }
-
-        // Search products
-        function searchProducts(searchTerm) {
-            const products = document.querySelectorAll('.product-card')
-            
-            if (searchTerm.length < 2) {
-                // Show all products if search term is too short
-                products.forEach(product => {
-                    product.style.display = 'block'
+                    
+                    const product = data.product;
+                    const sizes = data.sizes;
+                    
+                    let sizesHtml = '';
+                    sizes.forEach(size => {
+                        const disabled = size.stock === 0 ? 'disabled' : '';
+                        sizesHtml += `
+                            <button class="size-btn" onclick="selectSize('${size.size}', ${size.stock}, this)" ${disabled}>
+                                ${size.size}
+                                <div class="size-stock">${size.stock} left</div>
+                            </button>
+                        `;
+                    });
+                    
+                    const modalContent = document.getElementById('modalContent');
+                    modalContent.innerHTML = `
+                        <div class="product-details">
+                            <div class="product-image">
+                                <img src="${product.image || '/placeholder.svg?height=300&width=300'}" alt="${product.name}">
+                            </div>
+                            <div class="product-info">
+                                <h2>${product.name}</h2>
+                                <div class="product-price">RM ${parseFloat(product.price).toFixed(2)}</div>
+                                
+                                ${product.description ? <div class="product-description">${product.description}</div> : ''}
+                                
+                                <div class="size-selector">
+                                    <label>Size:</label>
+                                    <div class="size-options">
+                                        ${sizesHtml}
+                                    </div>
+                                </div>
+                                
+                                <div class="stock-info" id="stockInfo" style="display: none;">
+                                    Stock: <span id="selectedStock">0</span> available
+                                </div>
+                                
+                                <div class="quantity-selector">
+                                    <label>Quantity:</label>
+                                    <button class="qty-btn" onclick="changeQuantity(-1)">-</button>
+                                    <input type="number" id="quantity" class="qty-input" value="1" min="1" max="1">
+                                    <button class="qty-btn" onclick="changeQuantity(1)">+</button>
+                                </div>
+                                
+                                <button class="add-to-cart-btn" onclick="addToCart(${product.id})" id="addToCartBtn" disabled>
+                                    Select Size to Add to Cart
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                    
+                    // Reset selection
+                    selectedSize = null;
+                    selectedSizeStock = 0;
+                    
+                    document.getElementById('productModal').style.display = 'block';
                 })
-                return
-            }
-
-            searchTerm = searchTerm.toLowerCase()
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Error loading product details');
+                });
+        }
+function selectSize(size, stock, element) {
+            // Remove selected class from all size buttons
+            document.querySelectorAll('.size-btn').forEach(btn => btn.classList.remove('selected'));
             
-            products.forEach(product => {
-                const productName = product.querySelector('.product-name').textContent.toLowerCase()
-                const productCategory = product.querySelector('.product-category').textContent.toLowerCase()
-                const productColor = product.querySelector('.product-colour').textContent.toLowerCase()
-                
-                if (productName.includes(searchTerm) || 
-                    productCategory.includes(searchTerm) || 
-                    productColor.includes(searchTerm)) {
-                    product.style.display = 'block'
-                } else {
-                    product.style.display = 'none'
-                }
-            })
+            // Add selected class to clicked button
+            element.classList.add('selected');
+            
+            // Update global variables
+            selectedSize = size;
+            selectedSizeStock = stock;
+            
+            // Update UI
+            document.getElementById('stockInfo').style.display = 'block';
+            document.getElementById('selectedStock').textContent = stock;
+            
+            const quantityInput = document.getElementById('quantity');
+            quantityInput.max = stock;
+            quantityInput.value = Math.min(quantityInput.value, stock);
+            
+            const addToCartBtn = document.getElementById('addToCartBtn');
+            addToCartBtn.disabled = false;
+            addToCartBtn.textContent = 'Add to Cart';
         }
 
-        // Sort products
-        function sortProducts(sortBy) {
-            const products = Array.from(document.querySelectorAll('.product-card'))
-            const productsGrid = document.querySelector('.products-grid')
+        function changeQuantity(change) {
+            const input = document.getElementById('quantity');
+            const newValue = parseInt(input.value) + change;
+            const max = parseInt(input.max);
             
-            products.sort((a, b) => {
-                switch(sortBy) {
-                    case 'name':
-                        return a.querySelector('.product-name').textContent.localeCompare(
-                            b.querySelector('.product-name').textContent
-                        )
-                    case 'price-low':
-                        return parseFloat(a.querySelector('.product-price').textContent.replace('$', '')) - 
-                               parseFloat(b.querySelector('.product-price').textContent.replace('$', ''))
-                    case 'price-high':
-                        return parseFloat(b.querySelector('.product-price').textContent.replace('$', '')) - 
-                               parseFloat(a.querySelector('.product-price').textContent.replace('$', ''))
-                    case 'category':
-                        return a.querySelector('.product-category').textContent.localeCompare(
-                            b.querySelector('.product-category').textContent
-                        )
-                    default:
-                        return 0
-                }
-            })
-            
-            // Clear and re-append sorted products
-            productsGrid.innerHTML = ''
-            products.forEach(product => productsGrid.appendChild(product))
-        }
-
-        // Quick view product
-        function quickViewProduct(productId) {
-            // Create a simple modal for product quick view
-            const modal = document.createElement('div')
-            modal.style.cssText = `
-                position: fixed;
-                top: 0;
-                left: 0;
-                width: 100%;
-                height: 100%;
-                background: rgba(0,0,0,0.5);
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                z-index: 2000;
-            `
-
-            // Find the product data from the current page
-            const productCard = document.querySelector(`[onclick*="${productId}"]`).closest('.product-card')
-            const productName = productCard.querySelector('.product-name').textContent
-            const productPrice = productCard.querySelector('.product-price').textContent
-            const productCategory = productCard.querySelector('.product-category').textContent
-            const productColor = productCard.querySelector('.product-colour').textContent
-            const productSize = productCard.querySelector('.product-size').textContent
-            const productImage = productCard.querySelector('.product-image').src
-            const stockInfo = productCard.querySelector('.product-stock').textContent
-
-            const modalContent = document.createElement('div')
-            modalContent.style.cssText = `
-                background: white;
-                padding: 2rem;
-                border-radius: 8px;
-                max-width: 500px;
-                width: 90%;
-                max-height: 80vh;
-                overflow-y: auto;
-            `
-
-            modalContent.innerHTML = `
-                <h3 style="margin-bottom: 1rem; color: #333;">${productName}</h3>
-                <div style="display: flex; gap: 1rem; margin-bottom: 1rem;">
-                    <img src="${productImage}" alt="${productName}" 
-                         style="width: 150px; height: 150px; object-fit: cover; border-radius: 4px;">
-                    <div>
-                        <p><strong>Category:</strong> ${productCategory}</p>
-                        <p><strong>Color:</strong> ${productColor}</p>
-                        <p><strong>Size:</strong> ${productSize}</p>
-                        <p><strong>Price:</strong> ${productPrice}</p>
-                        <p><strong>Stock:</strong> ${stockInfo}</p>
-                    </div>
-                </div>
-                <div style="display: flex; gap: 1rem; justify-content: flex-end;">
-                    <button onclick="addToCart(${productId}, '${productName}'); document.body.removeChild(document.querySelector('.quick-view-modal'))" 
-                            style="padding: 0.5rem 1rem; border: none; background: #000; color: white; border-radius: 4px; cursor: pointer;">
-                        Add to Cart
-                    </button>
-                    <button onclick="document.body.removeChild(document.querySelector('.quick-view-modal'))" 
-                            style="padding: 0.5rem 1rem; border: 1px solid #ddd; background: white; color: #333; border-radius: 4px; cursor: pointer;">
-                        Close
-                    </button>
-                </div>
-            `
-
-            modal.className = 'quick-view-modal'
-            modal.appendChild(modalContent)
-            document.body.appendChild(modal)
-
-            // Close on backdrop click
-            modal.addEventListener('click', (e) => {
-                if (e.target === modal) {
-                    document.body.removeChild(modal)
-                }
-            })
-        }
-
-        // Update cart count in header
-        function updateCartCount(count) {
-            const cartCountElement = document.getElementById("cartCount")
-            if (cartCountElement) {
-                cartCountElement.textContent = count
-                if (count > 0) {
-                    cartCountElement.style.display = "flex"
-                } else {
-                    cartCountElement.style.display = "none"
-                }
+            if (newValue >= 1 && newValue <= max) {
+                input.value = newValue;
             }
         }
 
-        // Load cart count on page load
-        function loadCartCount() {
-            fetch("api/cart_operations.php", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/x-www-form-urlencoded",
-                },
-                body: "action=get_count",
+        function addToCart(productId) {
+            if (!selectedSize) {
+                alert('Please select a size');
+                return;
+            }
+            
+            const quantity = document.getElementById('quantity').value;
+            
+            const formData = new FormData();
+            formData.append('product_id', productId);
+            formData.append('size', selectedSize);
+            formData.append('quantity', quantity);
+            
+            fetch('add_to_cart_with_sizes.php', {
+                method: 'POST',
+                body: formData
             })
-            .then((response) => response.json())
-            .then((data) => {
+            .then(response => response.json())
+            .then(data => {
                 if (data.success) {
-                    updateCartCount(data.cart_count)
+                    alert('Product added to cart!');
+                    closeModal();
+                } else {
+                    alert('Error adding to cart: ' + data.message);
                 }
             })
-            .catch((error) => {
-                console.error("Error loading cart count:", error)
-            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Error adding to cart');
+            });
         }
 
-        // Show notification function
-        function showNotification(message, type = "success") {
-            // Remove existing notifications
-            const existingNotifications = document.querySelectorAll('.notification')
-            existingNotifications.forEach(notification => {
-                if (document.body.contains(notification)) {
-                    document.body.removeChild(notification)
-                }
-            })
-
-            const notification = document.createElement("div")
-            notification.className = `notification ${type}`
-            notification.textContent = `${type === 'error' ? '❌' : '✅'} ${message}`
-
-            // Add styles
-            notification.style.cssText = `
-                position: fixed;
-                top: 100px;
-                right: 20px;
-                background: ${type === 'error' ? '#e74c3c' : '#2ecc71'};
-                color: white;
-                padding: 1rem 1.5rem;
-                border-radius: 4px;
-                box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-                z-index: 1001;
-                font-weight: 500;
-                animation: slideIn 0.3s ease;
-                max-width: 300px;
-                word-wrap: break-word;
-            `
-
-            // Add animation keyframes
-            if (!document.querySelector('#notification-animation')) {
-                const style = document.createElement('style')
-                style.id = 'notification-animation'
-                style.textContent = `
-                    @keyframes slideIn {
-                        from { transform: translateX(100%); opacity: 0; }
-                        to { transform: translateX(0); opacity: 1; }
-                    }
-                `
-                document.head.appendChild(style)
-            }
-
-            document.body.appendChild(notification)
-
-            // Auto remove after 3 seconds
-            setTimeout(() => {
-                if (document.body.contains(notification)) {
-                    notification.style.animation = "slideIn 0.3s ease reverse"
-                    setTimeout(() => {
-                        if (document.body.contains(notification)) {
-                            document.body.removeChild(notification)
-                        }
-                    }, 300)
-                }
-            }, 3000)
+        function closeModal() {
+            document.getElementById('productModal').style.display = 'none';
         }
 
-        // Debounce function for search
-        function debounce(func, wait) {
-            let timeout
-            return function executedFunction(...args) {
-                const later = () => {
-                    clearTimeout(timeout)
-                    func(...args)
-                }
-                clearTimeout(timeout)
-                timeout = setTimeout(later, wait)
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            const modal = document.getElementById('productModal');
+            if (event.target === modal) {
+                closeModal();
             }
         }
-
-        // Initialize shop page
-        document.addEventListener('DOMContentLoaded', function() {
-            loadCartCount()
-            
-            // Setup search with debounce
-            const searchInput = document.getElementById('searchInput')
-            const debouncedSearch = debounce(searchProducts, 300)
-            searchInput.addEventListener('input', (e) => {
-                debouncedSearch(e.target.value)
-            })
-            
-            // Add smooth animations to product cards
-            const productCards = document.querySelectorAll('.product-card')
-            productCards.forEach((card, index) => {
-                card.style.opacity = '0'
-                card.style.transform = 'translateY(20px)'
-                setTimeout(() => {
-                    card.style.transition = 'all 0.3s ease'
-                    card.style.opacity = '1'
-                    card.style.transform = 'translateY(0)'
-                }, index * 50)
-            })
-        })
     </script>
 </body>
 </html>
