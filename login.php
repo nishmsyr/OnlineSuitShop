@@ -1,122 +1,100 @@
 <?php
-include_once 'functions.php';
-
-$session_id = initializeSession();
+include 'db.php';
+session_start();
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $role = $_POST["role"];
-    $email = sanitizeInput($_POST["email"]);
-    $password = $_POST["password"];
+  $role = $_POST["role"];
+  $email = $_POST["email"];
+  $password = $_POST["password"];
 
-    if ($role === "customer") {
-        $customer = getCustomerByEmail($conn, $email);
-        if ($customer && password_verify($password, $customer['PASSWORD'])) {
-            $_SESSION["customer_id"] = $customer["customer_id"];
-            $_SESSION["customer_name"] = $customer["customer_name"];
-            $_SESSION["user_role"] = "customer";
-            header("Location: index.php");
-            exit();
-        } else {
-            $error_message = "Invalid email or password. Please check your credentials and try again.";
-        }
-    } elseif ($role === "admin") {
-        // Check admin table (you'll need to create this)
-        $admin = getAdminByEmail($conn, $email);
-        if ($admin && password_verify($password, $admin['admin_password'])) {
-            $_SESSION["admin_id"] = $admin["admin_id"];
-            $_SESSION["admin_name"] = $admin["admin_name"];
-            $_SESSION["user_role"] = "admin";
-            header("Location: admin.php");
-            exit();
-        } else {
-            $error_message = "Invalid admin credentials. Please verify your login details.";
-        }
+  if ($role === "customer") {
+    $stmt = $conn->prepare("SELECT * FROM customers WHERE email = ?");
+  } else if ($role === "admin") {
+    $stmt = $conn->prepare("SELECT * FROM admins WHERE email = ?");
+  } else {
+    die("Invalid role selected.");
+  }
+
+  $stmt->bind_param("s", $email);
+  $stmt->execute();
+  $result = $stmt->get_result();
+
+  if ($result->num_rows === 1) {
+    $user = $result->fetch_assoc();
+
+    if ($password === $user["password"]) {
+      $_SESSION["user_id"] = $user["id"];
+      $_SESSION["user_name"] = $user["name"];
+      $_SESSION["user_role"] = $role;
+
+      if ($role === "customer") {
+        header("Location: index.php");
+      } elseif ($role === "admin") {
+        header("Location: admin_home.php");
+      }
+      exit();
+    } else {
+      echo "<script>alert('Incorrect password.'); window.location.href='login.php';</script>";
     }
+  } else {
+    echo "<script>alert('User not found.'); window.location.href='login.php';</script>";
+  }
+
+  $stmt->close();
 }
+$conn->close();
 ?>
+
+
+
+
+
+
+
+
+
 
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - BLACKTIE</title>
-    <link rel="stylesheet" href="styles.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Login - Blacktie Suit Shop</title>
+  <link rel="stylesheet" href="styles.css" />
 </head>
+
 <body>
-    <div class="auth-background">
-        <div class="container">
-            <h2>Login</h2>
 
-            <?php if (isset($error_message)): ?>
-                <div class="alert alert-error" id="errorAlert">
-                    <span class="alert-icon">❌</span>
-                    <div class="alert-content"><?php echo htmlspecialchars($error_message); ?></div>
-                    <button class="alert-close" onclick="closeAlert('errorAlert')">&times;</button>
-                </div>
-            <?php endif; ?>
+  <div class="auth-background">
+    <div class="container">
+      <h2>Login</h2>
 
-            <form action="login.php" method="POST">
-                <div class="radio-group">
-                    <label>
-                        <input type="radio" name="role" value="customer" required 
-                               <?php echo (isset($_POST['role']) && $_POST['role'] === 'customer') ? 'checked' : ''; ?> /> 
-                        Customer
-                    </label>
-                    <label>
-                        <input type="radio" name="role" value="admin" required 
-                               <?php echo (isset($_POST['role']) && $_POST['role'] === 'admin') ? 'checked' : ''; ?> /> 
-                        Admin
-                    </label>
-                </div>
-
-                <label for="email">Email</label>
-                <input type="email" name="email" id="email" required 
-                       value="<?php echo isset($_POST['email']) ? htmlspecialchars($_POST['email']) : ''; ?>" />
-
-                <label for="password">Password</label>
-                <input type="password" name="password" id="password" required />
-
-                <button type="submit">Log In</button>
-            </form>
-
-            <p>Don't have an account? <a href="register.php">Create Account</a>.</p>
+      <form action="login.php" method="POST">
+        <!-- Role selection -->
+        <div class="radio-group">
+          <label><input type="radio" name="role" value="customer" required /> Customer</label>
+          <label><input type="radio" name="role" value="admin" required /> Admin</label>
         </div>
+
+        <!-- Email -->
+        <label for="email">Email</label>
+        <input type="email" name="email" required />
+
+        <!-- Password -->
+        <label for="password">Password</label>
+        <input type="password" name="password" required />
+
+        <!-- Login Button -->
+        <button type="submit">Log In</button>
+      </form>
+
+
+      <!-- Register Redirect -->
+      <p align="center"><br>Don't have an account? <a href="register.php">Create Account</a>.</p>
     </div>
+  </div>
 
-    <script>
-        // Auto-focus first input or email if error occurred
-        document.addEventListener('DOMContentLoaded', function() {
-            const emailInput = document.getElementById('email');
-            const firstRadio = document.querySelector('input[name="role"]');
-            
-            if (emailInput.value) {
-                emailInput.focus();
-            } else if (firstRadio && !document.querySelector('input[name="role"]:checked')) {
-                firstRadio.focus();
-            }
-        });
-
-        // Close alert function
-        function closeAlert(alertId) {
-            const alert = document.getElementById(alertId);
-            if (alert) {
-                alert.style.animation = 'slideDown 0.3s ease reverse';
-                setTimeout(() => {
-                    alert.remove();
-                }, 300);
-            }
-        }
-
-        // Auto-hide alerts after 5 seconds
-        setTimeout(() => {
-            const alerts = document.querySelectorAll('.alert');
-            alerts.forEach(alert => {
-                if (alert.id) {
-                    closeAlert(alert.id);
-                }
-            });
-        }, 5000);
-    </script>
 </body>
+
 </html>

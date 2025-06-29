@@ -226,7 +226,7 @@ $stmt->close();
     <div class="navbar">
         <div class="left">
             <h1 class="logo">BLACKTIE</h1>
-            <a href="adminhome.html" class="nav-link">Home</a>
+            <a href="admin_home.php" class="nav-link">Home</a>
         </div>
         <div class="right">
             <button class="logout-btn" onclick="window.location.href='login.php'">Logout</button>

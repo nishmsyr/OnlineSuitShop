@@ -40,10 +40,12 @@ body {
   color: white;
   text-decoration: none;
   font-size: 18px;
+  transition: all 0.3s ease;
 }
 
 .nav-link:hover {
   text-decoration: underline;
+  color: #a0a0a0;
 }
 
 /* ==== Icon Buttons ==== */
@@ -85,7 +87,7 @@ body {
 
 /* ==== Hero Section ==== */
 .hero {
-  background-image: url("image/homebackground.png");
+  background-image: url("Assets/homebackground.png");
   background-size: cover;
   background-position: center;
   height: 100vh;

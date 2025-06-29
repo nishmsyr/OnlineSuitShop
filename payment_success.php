@@ -106,7 +106,7 @@ if (!$order) {
     <div class="navbar">
         <div class="left">
             <h1 class="logo">BLACKTIE</h1>
-            <a href="home.html" class="nav-link">Home</a>
+            <a href="index.php" class="nav-link">Home</a>
             <a href="shop.php" class="nav-link">Shop</a>
         </div>
         <div class="right">

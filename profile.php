@@ -123,13 +123,18 @@ $stmt->close();
             border: none;
             cursor: pointer;
             font-size: 16px;
-            transition: background 0.3s;
+            transition: all 0.3s ease;
             color: #333;
         }
 
         .tab-btn.active {
             background: #000;
             color: white;
+        }
+
+        .tab-btn:hover {
+            background: #666;
+            color: #f8f9fa;
         }
 
         .tab-content {
@@ -277,7 +282,7 @@ $stmt->close();
     <div class="navbar">
         <div class="left">
             <h1 class="logo">BLACKTIE</h1>
-            <a href="home.html" class="nav-link">Home</a>
+            <a href="index.php" class="nav-link">Home</a>
             <a href="shop.php" class="nav-link">Shop</a>
         </div>
         <div class="right">

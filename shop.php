@@ -220,7 +220,7 @@ if ($result->num_rows > 0) {
     <div class="navbar">
         <div class="left">
             <h1 class="logo">BLACKTIE</h1>
-            <a href="home.html" class="nav-link">Home</a>
+            <a href="index.php" class="nav-link">Home</a>
             <a href="shop.php" class="nav-link">Shop</a>
         </div>
         <div class="right">
@@ -330,7 +330,7 @@ function showProductDetails(productId) {
                                 <h2>${product.name}</h2>
                                 <div class="product-price">RM ${parseFloat(product.price).toFixed(2)}</div>
                                 
-                                ${product.description ? <div class="product-description">${product.description}</div> : ''}
+                                ${product.description ? `<div class="product-description">${product.description}</div>` : ''}
                                 
                                 <div class="size-selector">
                                     <label>Size:</label>

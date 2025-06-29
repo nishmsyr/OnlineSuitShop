@@ -18,7 +18,7 @@
     <!-- Left: Logo and Nav Links -->
     <div class="left">
       <h1 class="logo">BLACKTIE</h1>
-      <a href="adminhome.html" class="nav-link">Home</a>
+      <a href="admin_home.php" class="nav-link">Home</a>
     </div>
 
     <!-- Right: Profile, Cart, and Logout -->
